@@ -141,10 +141,11 @@ if ($row['profile'] == "") {
                             </label>
                         </form>
                     </div>
-
                 </div>
             </div>
         </div>
+
+        <button type="submit" id="saveBtn" class="btn btn-primary">Submit</button>
     </div>
 </body>
 
@@ -193,7 +194,7 @@ if ($row['profile'] == "") {
                         imgElement.src = event.target.result;
                         imgElement.onload = function(e) {
                             const canvas = document.createElement("canvas");
-                            const MAX_WIDTH = 800;
+                            const MAX_WIDTH = 600;
 
                             const scaleSize = MAX_WIDTH / e.target.width;
                             canvas.width = MAX_WIDTH;
@@ -204,7 +205,7 @@ if ($row['profile'] == "") {
                             ctx.drawImage(e.target, 0, 0, canvas.width, canvas.height);
 
                             const srcEncoded = ctx.canvas.toDataURL(e.target, "image/jpeg");
-                            console.log(srcEncoded);
+                            // console.log(srcEncoded);
                             done(srcEncoded);
                         }
                     }
@@ -228,7 +229,7 @@ if ($row['profile'] == "") {
             if (files && files.length > 0) {
                 reader = new FileReader();
                 reader.onload = function(event) {
-                     
+
                     const file = document.querySelector("#profile_image").files[0];
                     reader.readAsDataURL(file);
                     reader.onload = function(event) {
@@ -236,7 +237,7 @@ if ($row['profile'] == "") {
                         imgElement.src = event.target.result;
                         imgElement.onload = function(e) {
                             const canvas = document.createElement("canvas");
-                            const MAX_WIDTH = 800;
+                            const MAX_WIDTH = 600;
 
                             const scaleSize = MAX_WIDTH / e.target.width;
                             canvas.width = MAX_WIDTH;
@@ -247,7 +248,7 @@ if ($row['profile'] == "") {
                             ctx.drawImage(e.target, 0, 0, canvas.width, canvas.height);
 
                             const srcEncoded = ctx.canvas.toDataURL(e.target, "image/jpeg");
-                            console.log(srcEncoded);
+                            // console.log(srcEncoded);
                             done(srcEncoded);
                         }
                     }
@@ -259,16 +260,16 @@ if ($row['profile'] == "") {
 
         $modal.on('shown.bs.modal', function() {
             if (profile_set_view) {
-                cropper_view = 0
-                imgHeight = 512
-                imgWidth = 512
+                cropper_view = 1
+                imgHeight = 452
+                imgWidth = 452
                 profile_set_view = false
             }
 
             if (cover_set_view) {
-                cropper_view = 0
-                imgHeight = 500
-                imgWidth = 1280
+                cropper_view = 4
+                imgHeight = 400
+                imgWidth = 800
                 cover_set_view = false
             }
 
@@ -277,6 +278,7 @@ if ($row['profile'] == "") {
                 viewMode: 3,
                 preview: '.preview'
             });
+            
         }).on('hidden.bs.modal', function() {
             cropper.destroy();
             cropper = null;
@@ -300,8 +302,8 @@ if ($row['profile'] == "") {
                         cover_url = reader.result
                     }
                     if (profile_input) {
-                        console.log(typeof reader.result);
-                        console.log(reader.result);
+                        // console.log(typeof reader.result);
+                        // console.log(reader.result);
                         $('#profile_uploaded_image').attr('src', reader.result);
                         profile_input = false
                         profile_url = reader.result;
@@ -309,61 +311,39 @@ if ($row['profile'] == "") {
                     $(function() {
                         $('#modal').modal('toggle');
                     });
-                    // $.ajax({
-                    //     url: 'upload.php',
-                    //     method: 'POST',
-                    //     data: {
-                    //         imgIdentify:imgType,
-                    //         image: base64data
-                    //     },
-                    //     success: function(data) {
-                    //         data = JSON.parse(data);
-                    //         $modal.modal('hide');
-                    //         if (cover_input) {               
-                    //             $('#cover_uploaded_image').attr('src', data[0]);
-                    //             cover_input = false
-                    //         }
-                    //         if (profile_input) {
-                    //             $('#profile_uploaded_image').attr('src', data[0]);
-                    //             profile_input = false
-                    //         }
-                    //     }
-                    // });
+
                 };
             });
         });
 
-        function cover_image_compress() {
-            const file = document.querySelector("#cover_image").files[0];
-
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = function(event) {
-                const imgElement = document.createElement("img");
-                imgElement.src = event.target.result;
-                imgElement.onload = function(e) {
-                    const canvas = document.createElement("canvas");
-                    const MAX_WIDTH = 400;
-
-                    const scaleSize = MAX_WIDTH / e.target.width;
-                    canvas.width = MAX_WIDTH;
-                    canvas.height = e.target.height * scaleSize;
-
-                    const ctx = canvas.getContext("2d");
-
-                    ctx.drawImage(e.target, 0, 0, canvas.width, canvas.height);
-
-                    const srcEncoded = ctx.canvas.toDataURL(e.target, "image/jpeg");
-
-                    // you can send srcEncoded to the server
-                    document.querySelector("#output").src = srcEncoded;
-                }
+        $("#saveBtn").click(function() {
+            if (profile_url.length <= 0 || cover_url.length <= 0) {
+                alert("you have to select both images")
+            } else {
+                $.ajax({
+                    url: 'upload.php',
+                    method: 'POST',
+                    data: {
+                        imageUpdate : true,
+                        image_cover: cover_url,
+                        image_profile: profile_url
+                    },
+                    success: function(data) {
+                        data = JSON.parse(data);
+                        $modal.modal('hide');
+                        $('#cover_uploaded_image').attr('src', data[1]);
+                        $('#profile_uploaded_image').attr('src', data[0]);
+                        alert("images updated sucessfully")
+                        // if (cover_input) {               
+                        //     cover_input = false
+                        // }
+                        // if (profile_input) {
+                        //     profile_input = false
+                        // }
+                    }
+                });
+                // console.log(profile_url, cover_url);
             }
-        }
-
-
-        console.log(profile_url, cover_url);
+        })
     });
 </script>
